@@ -6,7 +6,10 @@ import { RollupExample, RollupExample__factory } from "../typechain-types";
 
 describe("RollupExample", function () {
   let rollupExample: RollupExample;
-  let admin: SignerWithAddress, alice: SignerWithAddress, bob: SignerWithAddress, charlie: SignerWithAddress;
+  let admin: SignerWithAddress,
+    alice: SignerWithAddress,
+    bob: SignerWithAddress,
+    charlie: SignerWithAddress;
   let l2: MockL2;
 
   before(async function () {
@@ -20,10 +23,24 @@ describe("RollupExample", function () {
 
   it("should set initial balances", async function () {
     // TODO: Implement test case for setting initial balances
+    l2.setInitialBalance([alice.address, bob.address, charlie.address]);
   });
 
   it("should process L2 transactions and update balances", async function () {
     // TODO: Implement test case for processing L2 transactions and updating balances
+    await l2.addTransaction(alice.address, bob.address, ethers.parseEther("1"));
+    await l2.addTransaction(
+      charlie.address,
+      alice.address,
+      ethers.parseEther("2")
+    );
+
+    await l2.proposeTransactions();
+    await l2.finalizeTransactions();
+
+    expect(l2.getBalance(alice.address)).to.equal(ethers.parseEther("11"));
+    expect(l2.getBalance(bob.address)).to.equal(ethers.parseEther("11"));
+    expect(l2.getBalance(charlie.address)).to.equal(ethers.parseEther("8"));
   });
 
   it("should withdraw more than 1 ethers from alice to charlie", async function () {
